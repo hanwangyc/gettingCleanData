@@ -1,21 +1,15 @@
 This codebook describes each variable (column) in the tidy data file. 
 
-|Variables      |Description    |
-|Body       |Signal based on the body of the subject, one of two components derived from the time based signals on the phone's accelerometer
-|Freq       |Measurement based on the "frequency" domain, taken as a Fast Fourier Transform of the time-based signals
-|Gravity    |Signal based on gravity, second of the two measurement components derived from the phone's accelerometer
-|Gyro       |Measurement taken from the gyroscope on the phone
-|Jerk       |Measurement of sudden movement, based on body acceleration and angular velocity
-|Mag        |Measurement of the magnitude using the Euclidean norm
-|Mean       |Indicates that the measurement is a mean within the original Human Activity Recognition data set
-|meanOf     |Indicates that the measurement is a mean in the tidy data taken over all experiments for a particular activity, person and feature
-|Stdev      |Indicates that the measurement is a standard deviation within the original Human Activity Recognition data set
-|Time       |Measurement based on the "time" domain. Measurements taken from the phone were measured at a constant rate of 50Hz.
-|X          |Measurement taken along the X axis (3-dimensional)
-|Y          |Measurement taken along the Y axis (3-dimensional)
-|Z          |Measurement taken along the Z axis (3-dimensional)
-|1          |`subject`         |integer|unique identifier for the participant with a range of `1` to `30`
-|2          |`activity`        |character| `walking` \\ `walkingupstairs` \\ `walkingdownstairs` \\ `sitting` \\ `standing` \\ `laying`
+subject - ID of the test subject
+activity - The type of activity performed
+        value 1 - walking
+        2 -` walkingupstairs
+        3 -  walkingdownstairs
+        4 -  sitting` 
+        5 -  standing`
+        6 -  laying`
+
+Measurements
 |3          |`meanOfTimeBodyAccMeanX`|numeric|mean of the time domain body acceleration means (X axis)
 |4          |`meanOfTimeBodyAccMeanY`|numeric|mean of the time domain body acceleration means (Y axis)
 |5          |`meanOfTimeBodyAccMeanZ`|numeric|mean of the time domain body acceleration means (Z axis)
