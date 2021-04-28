@@ -52,3 +52,5 @@ colnames(finaldata)[2] <- "Activity"
 
 #Wrtie tidy data into a text
 write.table(finaldata, "tidyData.txt", row.names = FALSE, quote = FALSE)
+#Generate code book
+write.table(names(finaldata), "codebook.txt", row.names = FALSE, quote = FALSE)
