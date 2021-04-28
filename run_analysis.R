@@ -14,46 +14,41 @@ unzip("Dataset.zip")
 
 ###Load the datasets
 UCIDir <- "UCI HAR Dataset/"
-testDataDir <- "UCI HAR Dataset/test/"
-trainDataDir <- "UCI HAR Dataset/train/"
-activity <- read.table(paste0(UCIDir, "activity_labels.txt"))
-activity[,2] <- tolower(gsub("_", "", activity[,2]))
-features <- read.table(paste0(UCIDir, "features.txt"),stringsAsFactors = FALSE, header = FALSE)
-testSubjects <- as.numeric(readLines(paste0(testDataDir, "subject_test.txt")))
-testLabels <- readLines(paste0(testDataDir, "y_test.txt"))
-testData <- read.table(paste0(testDataDir, "X_test.txt"))
-trainSubjects <- as.numeric(readLines(paste0(trainDataDir, "subject_train.txt")))
-trainLabels <- readLines(paste0(trainDataDir, "y_train.txt"))
-trainData <- read.table(paste0(trainDataDir, "X_train.txt"))
+features <- read.table(paste0(UCIDir, "/features.txt",sep=""), col.names = c("id", "measurements"))
+activity <- read.table(paste0(UCIDir, "activity_labels.txt", sep=""), col.names = c("n", "activity"))
+subjecttest <- read.table(paste0(UCIDir, "/test/subject_test.txt", sep=""), col.names = c("subject"))
+xtest <- read.table(paste0(UCIDir, "/test/X_test.txt", sep=""), col.names = features$measurements)
+ytest <- read.table(paste0(UCIDir, "/test/y_test.txt", sep=""), col.names = "activitycode")
+subjecttrain <- read.table(paste0(UCIDir, "/train/subject_train.txt", sep=""), col.names = c("subject"))
+xtrain <- read.table(paste0(UCIDir, "/train/X_train.txt", sep=""), col.names = features$measurements)
+ytrain <- read.table(paste0(UCIDir, "/train/y_train.txt", sep=""), col.names = "activitycode")
 
 #Combining train and test data
-combined <- rbind(testData, trainData)
+combineddata <- cbind(rbind(subjecttest, subjecttrain), newydata <- rbind(ytest, ytrain),
+                      newxdata <- rbind(xtest, xtrain))
 
 # Extracts only the measurements on the mean and standard deviation for each measurement.
+library(dplyr)
+newtidydata <- select(combineddata, subject, activitycode, contains("mean"), contains("std"))
 
-newfeatures <- setdiff(grep("mean()|std()", features[,2]), grep("meanFreq()", features[,2]))
-newcoombined <- combined[newfeatures]
+# Applying descriptive names in new tidy dataset
+colnames(newtidydata)[2] = "Activity"
+newtidydata$Activity <- activity[newtidydata$Activity, 2]
+colnames(newtidydata) <- gsub("-mean", "Mean", colnames(newtidydata))
+colnames(newtidydata) <- gsub("^t", "Time", colnames(newtidydata))
+colnames(newtidydata) <- gsub("^f", "Freq", colnames(newtidydata))
+colnames(newtidydata) <- gsub("-std", "STD", colnames(newtidydata))
+colnames(newtidydata) <- gsub("subject", "Subject", colnames(newtidydata))
+colnames(newtidydata) <- gsub("tBody", "timebody", colnames(newtidydata))
+colnames(newtidydata) <- gsub("[-()]", "", colnames(newtidydata))
 
-# Applying descriptive activity names
-newcoombined <- cbind(activity = c(testLabels, trainLabels), newcoombined)
-newcoombined <- cbind(subject = c(testSubjects, trainSubjects), newcoombined)
-newcoombined$activity <- factor(newcoombined$activity,levels = activity[,1], labels = activity[,2])
-
-# Labeling data set with descriptive variable names
-features[,2][newfeatures] <- gsub("-mean", "Mean", features[,2][newfeatures])
-features[,2][newfeatures] <- gsub("-std", "Stdev", features[,2][newfeatures])
-features[,2][newfeatures] <- gsub("[-()]", "", features[,2][newfeatures])
-features[,2][newfeatures] <- gsub("^t", "Time", features[, 2][newfeatures])
-features[,2][newfeatures] <- gsub("^f", "Freq", features[, 2][newfeatures])
-features[,2][newfeatures] <- gsub("BodyBody", "Body", features[, 2][newfeatures])
-
-colnames(newcoombined) <- c("subject", "activity", features[,2][newfeatures])
-
-# Create tidy data set with averages
-oldColNames <- colnames(newcoombined)
-newColNames <- sapply(oldColNames, function(x) {paste("meanOf",x,sep="")})
-colnames(newcoombined) <- newColNames
-colnames(newcoombined)[1:2] <- oldColNames[1:2]
+# Create an independent average data for each subject and each activity 
+library(reshape2)
+finaldata <- melt(newtidydata, id = c("Subject", "Activity"))
+finaldata <- dcast(finaldata, Subject + Activity ~ variable, mean)
+colnames(finaldata) <- paste0("Mean of", colnames(finaldata), sep="")
+colnames(finaldata)[1] <- "Subject"
+colnames(finaldata)[2] <- "Activity"
 
 #Wrtie tidy data into a text
-write.table(newcoombined, "tidyData.txt", row.names = FALSE, quote = FALSE)
+write.table(finaldata, "tidyData.txt", row.names = FALSE, quote = FALSE)
